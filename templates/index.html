@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Smart Recipe Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- ============================================================
+     HOME PAGE / LANDING SECTION
+     ============================================================ -->
+    <div id="app">
+
+        <!-- SIDEBAR NAVIGATION MENU -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <span class="logo-icon">🥘</span>
+                <span class="logo-text">RecipeAI</span>
+            </div>
+
+            <div class="nav-links">
+                <a class="nav-item active" data-section="home" onclick="showSection('home', this)">
+                    <span class="nav-icon">🏠</span>
+                    <span>Home</span>
+                </a>
+                <a class="nav-item" data-section="search" onclick="showSection('search', this)">
+                    <span class="nav-icon">🔍</span>
+                    <span>Search Recipes</span>
+                </a>
+                <a class="nav-item" data-section="browse" onclick="showSection('browse', this); loadAllRecipes()">
+                    <span class="nav-icon">📚</span>
+                    <span>Browse All</span>
+                </a>
+                <a class="nav-item" data-section="history" onclick="showSection('history', this); loadHistory()">
+                    <span class="nav-icon">🕐</span>
+                    <span>Recipe History</span>
+                </a>
+                <a class="nav-item" data-section="favourites"
+                    onclick="showSection('favourites', this); loadFavourites()">
+                    <span class="nav-icon">❤️</span>
+                    <span>Favourites</span>
+                </a>
+                <a class="nav-item" data-section="notes" onclick="showSection('notes', this); loadNotes()">
+                    <span class="nav-icon">📝</span>
+                    <span>My Notes</span>
+                </a>
+            </div>
+
+            <!-- girl element -->
+            <div class="sidebar-girl">
+                <img src="{{ url_for('static', filename='images/girl.png') }}" alt="girl">
+            </div>
+
+
+
+            <div class="sidebar-footer">
+                <p>Smart • Simple • Tasty</p>
+            </div>
+        </nav>
+
+        <!-- MOBILE TOPBAR -->
+        <div class="topbar">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <span class="topbar-title">🥘 RecipeAI</span>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+
+            <!-- ===================== HOME SECTION ===================== -->
+            <section id="section-home" class="section active">
+                <div class="hero">
+                    <div class="hero-tag">✨ AI Smart Recipe Generator</div>
+                    <h1 class="hero-title">
+                        Cook Something Special<br />
+                        With<br />
+                        <em>Kitchen</em>
+                    </h1>
+                    <p class="hero-sub">Tell us what's in your kitchen — we'll figure out what's for dinner.</p>
+                    <div class="hero-actions">
+                        <button class="btn-primary"
+                            onclick="showSection('search', document.querySelector('[data-section=search]'))">
+                            Find Recipes →
+                        </button>
+                        <button class="btn-ghost"
+                            onclick="showSection('browse', document.querySelector('[data-section=browse]')); loadAllRecipes()">
+                            Browse All Recipes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="home-features">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <h3>Smart Matching</h3>
+                        <p>Our engine compares your pantry to 10+ curated recipes and ranks by ingredient similarity.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌿</div>
+                        <h3>Diet Aware</h3>
+                        <p>Filter by vegetarian or non-vegetarian preference and automatically exclude allergens.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔄</div>
+                        <h3>Substitutes</h3>
+                        <p>Missing an ingredient? We suggest smart swaps so you never have to skip a recipe.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📝</div>
+                        <h3>Save Notes</h3>
+                        <p>Jot down personal tweaks, shopping lists or cooking reminders in your private notepad.</p>
+                    </div>
+                </div>
+
+                <!-- Quick recipe preview strip -->
+                <div class="quick-strip">
+                    <h2 class="strip-title">Popular Dishes</h2>
+                    <div class="strip-items" id="homeStrip">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================== SEARCH / USER INPUT MODULE ===================== -->
+            <section id="section-search" class="section">
+                <div class="section-header">
+                    <h2>🔍 Find Your Recipe</h2>
+                    <p>Fill in what you have — we'll match the best recipes.</p>
+                </div>
+
+                <!-- MODULE 1: USER INPUT FORM -->
+                <div class="search-card">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Dish Name <span class="optional">(optional)</span></label>
+                            <input type="text" id="dishName" placeholder="e.g. pasta, curry, salad…" />
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Available Ingredients <span class="required">*</span></label>
+                            <input type="text" id="ingredients"
+                                placeholder="e.g. eggs, tomato, garlic, pasta, olive oil" />
+                            <small>Separate ingredients with commas</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Dietary Preference</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="dietary" value="both" checked />
+                                    <span>Both</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="dietary" value="veg" />
+                                    <span>🌿 Vegetarian</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="dietary" value="non-veg" />
+                                    <span>🍗 Non-Veg</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Allergy Information <span class="optional">(optional)</span></label>
+                            <input type="text" id="allergies" placeholder="e.g. nuts, dairy, gluten" />
+                            <small>Recipes with these ingredients will be excluded</small>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary search-btn" onclick="searchRecipes()">
+                        <span id="searchBtnText">🔍 Find Recipes</span>
+                    </button>
+                </div>
+
+                <!-- RESULTS AREA -->
+                <div id="searchResults" class="results-area" style="display:none">
+                    <div class="results-header">
+                        <h3 id="resultsTitle">Results</h3>
+                        <span class="result-count" id="resultCount"></span>
+                    </div>
+                    <div class="recipe-grid" id="recipeGrid"></div>
+                </div>
+
+                <div id="noResults" class="empty-state" style="display:none">
+                    <div class="empty-icon">🍽️</div>
+                    <h3>No matching recipes found</h3>
+                    <p>Try adding more ingredients or changing your dietary preference.</p>
+                </div>
+            </section>
+
+            <!-- ===================== BROWSE ALL SECTION ===================== -->
+            <section id="section-browse" class="section">
+                <div class="section-header">
+                    <h2>📚 All Recipes</h2>
+                    <p>Browse our complete collection of hand-crafted recipes.</p>
+                </div>
+                <div class="recipe-grid" id="browseGrid">
+                    <div class="loading-spinner">Loading recipes…</div>
+                </div>
+            </section>
+
+            <!-- ===================== HISTORY SECTION ===================== -->
+            <section id="section-history" class="section">
+                <div class="section-header">
+                    <h2>🕐 Search History</h2>
+                    <p>Your recent recipe searches are saved here during this session.</p>
+                </div>
+                <div id="historyList" class="history-list">
+                    <div class="empty-state">
+                        <div class="empty-icon">🔎</div>
+                        <p>No searches yet. Go find some recipes!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================== FAVOURITES SECTION ===================== -->
+            <section id="section-favourites" class="section">
+                <div class="section-header">
+                    <h2>❤️ My Favourites</h2>
+                    <p>Recipes you've saved. Click the heart on any recipe card to save it here.</p>
+                </div>
+                <div id="favouritesList" class="favourites-list">
+                    <div class="empty-state">
+                        <div class="empty-icon">❤️</div>
+                        <h3>No favourites yet</h3>
+                        <p>Open any recipe and click "Save to Favourites" to save it here.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================== NOTES SECTION ===================== -->
+            <section id="section-notes" class="section">
+                <div class="section-header">
+                    <h2>📝 My Kitchen Notes</h2>
+                    <p>Write down personal tweaks, shopping lists, or anything you want to remember.</p>
+                </div>
+                <div class="notes-card">
+                    <textarea id="notesArea"
+                        placeholder="Start writing your notes here…&#10;&#10;✏️ Ideas:&#10;• Shopping list for the week&#10;• Ingredient swaps you liked&#10;• Recipe modifications&#10;• Cooking reminders"
+                        rows="14"></textarea>
+                    <div class="notes-actions">
+                        <span id="notesSaved" class="save-indicator"></span>
+                        <button class="btn-primary" onclick="saveNotes()">💾 Save Notes</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ============================================================
+     RECIPE DETAIL MODAL
+     ============================================================ -->
+    <div id="recipeModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-card">
+            <button class="modal-close"
+                onclick="document.getElementById('recipeModal').classList.remove('open')">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+     JAVASCRIPT — ALL FRONTEND LOGIC
+     ============================================================ -->
+    <script>
+        // ---- UI NAVIGATION ----
+        function showSection(sectionId, clickedEl) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('section-' + sectionId).classList.add('active');
+            if (clickedEl) clickedEl.classList.add('active');
+            // Close sidebar on mobile after navigation
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ---- HOME STRIP ----
+        async function loadHomeStrip() {
+            const res = await fetch('/all_recipes');
+            const data = await res.json();
+            const strip = document.getElementById('homeStrip');
+            strip.innerHTML = data.recipes.slice(0, 5).map(r => `
+    <div class="strip-card" onclick="openModal(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+      <div class="strip-emoji">${r.emoji}</div>
+      <div class="strip-name">${r.name}</div>
+      <div class="strip-meta">${r.cooking_time} · ${r.calories} kcal</div>
+    </div>
+  `).join('');
+        }
+
+        // ---- MODULE 1+2: SEARCH ----
+        async function searchRecipes() {
+            const dishName = document.getElementById('dishName').value;
+            const ingredients = document.getElementById('ingredients').value;
+            const dietary = document.querySelector('input[name="dietary"]:checked').value;
+            const allergies = document.getElementById('allergies').value;
+
+            const btn = document.getElementById('searchBtnText');
+            btn.textContent = '⏳ Searching…';
+
+            try {
+                const res = await fetch('/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dish_name: dishName, ingredients, dietary, allergies })
+                });
+                const data = await res.json();
+                displayResults(data.recipes, data.total);
+            } catch (e) {
+                alert('Error searching recipes. Please try again.');
+            } finally {
+                btn.textContent = '🔍 Find Recipes';
+            }
+        }
+
+        // ---- MODULE 5: OUTPUT + UI — Display Recipe Cards ----
+        function displayResults(recipes, total) {
+            const grid = document.getElementById('recipeGrid');
+            const area = document.getElementById('searchResults');
+            const noResults = document.getElementById('noResults');
+            const count = document.getElementById('resultCount');
+            const title = document.getElementById('resultsTitle');
+
+            if (total === 0) {
+                area.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            area.style.display = 'block';
+            title.textContent = 'Matched Recipes';
+            count.textContent = `${total} recipe${total !== 1 ? 's' : ''} found`;
+
+            grid.innerHTML = recipes.map(r => buildRecipeCard(r)).join('');
+        }
+
+        function buildRecipeCard(recipe) {
+            const scoreColor = recipe.score >= 70 ? '#52c77d' : recipe.score >= 40 ? '#f5a623' : '#e07070';
+            const hasSubs = recipe.substitutes && Object.keys(recipe.substitutes).length > 0;
+
+            const subsHtml = hasSubs ? `
+    <div class="card-subs">
+      <div class="subs-title">🔄 Substitute Suggestions</div>
+      ${Object.entries(recipe.substitutes).map(([ing, subs]) => `
+        <div class="sub-row">
+          <span class="sub-missing">${ing}</span>
+          <span class="sub-arrow">→</span>
+          <span class="sub-options">${subs.slice(0, 2).join(' or ')}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+            const missingHtml = recipe.missing_ingredients && recipe.missing_ingredients.length > 0 ? `
+    <div class="missing-tag">
+      Missing: ${recipe.missing_ingredients.slice(0, 3).join(', ')}${recipe.missing_ingredients.length > 3 ? '…' : ''}
+    </div>
+  ` : '';
+
+            return `
+    <div class="recipe-card" onclick="openModal(${JSON.stringify(recipe).replace(/"/g, '&quot;')})">
+      <div class="card-emoji">${recipe.emoji}</div>
+      <div class="card-body">
+        <div class="card-top">
+          <h3 class="card-title">${recipe.name}</h3>
+          <span class="diet-badge ${recipe.category}">${recipe.category === 'veg' ? '🌿 Veg' : '🍗 Non-Veg'}</span>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-label">Match Score</div>
+          <div class="score-bar">
+            <div class="score-fill" style="width:${recipe.score}%; background:${scoreColor}"></div>
+          </div>
+          <span class="score-num" style="color:${scoreColor}">${recipe.score}%</span>
+        </div>
+        <div class="card-meta">
+          <span>⏱️ ${recipe.cooking_time}</span>
+          <span>🔥 ${recipe.calories} kcal</span>
+        </div>
+        ${missingHtml}
+        ${subsHtml}
+        <button class="btn-view">View Full Recipe →</button>
+      </div>
+    </div>
+  `;
+        }
+
+        // ---- BROWSE ALL ----
+        async function loadAllRecipes() {
+            const grid = document.getElementById('browseGrid');
+            grid.innerHTML = '<div class="loading-spinner">Loading…</div>';
+            const res = await fetch('/all_recipes');
+            const data = await res.json();
+            grid.innerHTML = data.recipes.map(r => buildRecipeCard(r)).join('');
+        }
+
+        // ---- MODAL ----
+        function openModal(recipe) {
+            const modal = document.getElementById('recipeModal');
+            const content = document.getElementById('modalContent');
+
+            const stepsHtml = recipe.steps.map((step, i) => `
+    <div class="step-row">
+      <div class="step-num">${i + 1}</div>
+      <div class="step-text">${step}</div>
+    </div>
+  `).join('');
+
+            const hasSubs = recipe.substitutes && Object.keys(recipe.substitutes).length > 0;
+            const subsHtml = hasSubs ? `
+    <div class="modal-subs">
+      <h4>🔄 Substitute Suggestions</h4>
+      ${Object.entries(recipe.substitutes).map(([ing, subs]) => `
+        <div class="sub-row">
+          <span class="sub-missing">${ing}</span>
+          <span class="sub-arrow">→</span>
+          <span class="sub-options">${subs.join(', ')}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+            const scoreColor = recipe.score >= 70 ? '#52c77d' : recipe.score >= 40 ? '#f5a623' : '#e07070';
+
+            content.innerHTML = `
+    <div class="modal-hero">
+      <div class="modal-emoji">${recipe.emoji}</div>
+      <div class="modal-title-block">
+        <h2>${recipe.name}</h2>
+        <div class="modal-badges">
+          <span class="diet-badge ${recipe.category}">${recipe.category === 'veg' ? '🌿 Vegetarian' : '🍗 Non-Vegetarian'}</span>
+          ${recipe.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-stats">
+      <div class="stat-box">
+        <div class="stat-val">⏱️ ${recipe.cooking_time}</div>
+        <div class="stat-label">Cook Time</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">🔥 ${recipe.calories}</div>
+        <div class="stat-label">Calories</div>
+      </div>
+      ${recipe.score < 100 ? `
+      <div class="stat-box">
+        <div class="stat-val" style="color:${scoreColor}">${recipe.score}%</div>
+        <div class="stat-label">Match Score</div>
+      </div>` : ''}
+    </div>
+
+    <div class="modal-section">
+      <h4>🧺 Ingredients</h4>
+      <div class="ingredients-list">
+        ${recipe.ingredients.map(i => `<span class="ingredient-chip">${i}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h4>👨‍🍳 Cooking Steps</h4>
+      <div class="steps-list">${stepsHtml}</div>
+    </div>
+
+    ${subsHtml}
+
+   <button class="btn-favourite" onclick="saveFavourite('${recipe.id}', '${recipe.name.replace(/'/g, "\\'")}')">
+      ❤️ Save to Favourites
+    </button>
+  `;
+
+            modal.classList.add('open');
+        }
+
+        function closeModal(e) {
+            if (e.target.id === 'recipeModal') {
+                document.getElementById('recipeModal').classList.remove('open');
+            }
+        }
+
+        // ---- HISTORY ----
+        async function loadHistory() {
+            const res = await fetch('/history');
+            const data = await res.json();
+            const list = document.getElementById('historyList');
+
+            if (!data.history.length) {
+                list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔎</div>
+        <p>No searches yet. Go find some recipes!</p>
+      </div>`;
+                return;
+            }
+
+            list.innerHTML = data.history.map((h, i) => `
+    <div class="history-item">
+      <div class="history-num">${i + 1}</div>
+      <div class="history-info">
+        <div class="history-dish">${h.dish_name}</div>
+        <div class="history-meta">
+          Ingredients: ${h.ingredients.join(', ') || 'None specified'} ·
+          Diet: ${h.dietary} ·
+          <strong>${h.results_count} result${h.results_count !== 1 ? 's' : ''}</strong>
+        </div>
+      </div>
+    </div>
+  `).join('');
+        }
+
+        // ---- NOTES ----
+        async function loadNotes() {
+            const res = await fetch('/notes');
+            const data = await res.json();
+            document.getElementById('notesArea').value = data.notes || '';
+        }
+
+        async function saveNotes() {
+            const notes = document.getElementById('notesArea').value;
+            const indicator = document.getElementById('notesSaved');
+            await fetch('/notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notes })
+            });
+            indicator.textContent = '✅ Saved!';
+            setTimeout(() => indicator.textContent = '', 2000);
+        }
+
+        // ---- FAVOURITES ----
+        // REPLACE the whole saveFavourite function with:
+        async function saveFavourite(recipeId, recipeName) {
+            try {
+                const res = await fetch('/favourites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipe_id: recipeId, recipe_name: recipeName })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('❤️ Saved to favourites!');
+                } else {
+                    showToast('⚠️ ' + (data.error || data.message));
+                }
+            } catch (e) {
+                showToast('❌ Could not save favourite. Please try again.');
+            }
+        }
+
+        async function loadFavourites() {
+            const res = await fetch('/favourites');
+            const data = await res.json();
+            const list = document.getElementById('favouritesList');
+
+            if (!data.favourites.length) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❤️</div>
+                        <h3>No favourites yet</h3>
+                        <p>Open any recipe and click "Save to Favourites" to save it here.</p>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = data.favourites.map(f => `
+                <div class="favourite-item" id="fav-${f.recipe_id}">
+
+                  <div class="fav-emoji">🍽️</div>
+                    <div class="fav-info">
+                        <div class="fav-name">${f.recipe_name}</div>
+                        <div class="fav-date">Saved on ${new Date(f.saved_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                    </div>
+                   <button class="btn-remove-fav" onclick="removeFavourite('${f.recipe_id}')" title="Remove">✕</button>
+            `).join('');
+        }
+
+        // REPLACE the whole removeFavourite function with:
+        async function removeFavourite(recipeId) {
+            try {
+                const res = await fetch('/favourites/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipe_id: recipeId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('fav-' + recipeId).remove();
+                    showToast('🗑️ Removed from favourites');
+                    const list = document.getElementById('favouritesList');
+                    if (!list.querySelector('.favourite-item')) {
+                        list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❤️</div>
+                        <h3>No favourites yet</h3>
+                        <p>Open any recipe and click "Save to Favourites" to save it here.</p>
+                    </div>`;
+                    }
+                }
+            } catch (e) {
+                showToast('❌ Could not remove favourite.');
+            }
+        }
+
+        // ---- TOAST NOTIFICATION ----
+        function showToast(message) {
+            let toast = document.getElementById('toastMsg');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toastMsg';
+                toast.className = 'toast';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ---- INIT ----
+        loadHomeStrip();
+    </script>
+</body>
+
+</html>
