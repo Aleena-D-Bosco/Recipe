@@ -225,14 +225,6 @@ def save_prefs():
     save_preferences(current_user.id, dietary, allergies)
     return jsonify({"success": True})
 
-# ============================================================
-# ROUTE: LOGOUT
-# ============================================================
-@app.route("/logout", methods=["POST"])
-@login_required
-def logout():
-    logout_user()
-    return jsonify({"success": True})
 
 # ============================================================
 # ENTRY POINT
