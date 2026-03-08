@@ -13,7 +13,8 @@
 import sqlite3
 from datetime import datetime
 
-DB_PATH = "recipeai.db"
+import os
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "recipeai.db")
 
 
 def init_db():
