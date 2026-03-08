@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session
 from flask_login import login_required, current_user
+import os
 
 # ── Import each module ───────────────────────────────────────────
 from modules.user_input_module      import parse_user_input, summarize_input
@@ -9,6 +10,7 @@ from modules.substitute_module      import find_substitutes_for_missing
 from modules.output_module          import (format_recipes_list,
                                             build_history_entry,
                                             format_all_browse_recipes)
+from flask_login                    import login_required, current_user, logout_user
 
 # ── Auth & User Data ─────────────────────────────────────────────
 from auth_routes                    import auth_bp, init_login_manager
@@ -28,7 +30,7 @@ from database_setup  import init_db as init_auth_db
 
 # ── Flask app setup ──────────────────────────────────────────────
 app = Flask(__name__)
-app.secret_key = "recipe_secret_key_2024"
+app.secret_key = os.environ.get("SECRET_KEY", "fallback-dev-key")
 
 # ── Register Auth Blueprint & Login Manager ──────────────────────
 app.register_blueprint(auth_bp)
@@ -223,6 +225,14 @@ def save_prefs():
     save_preferences(current_user.id, dietary, allergies)
     return jsonify({"success": True})
 
+# ============================================================
+# ROUTE: LOGOUT
+# ============================================================
+@app.route("/logout", methods=["POST"])
+@login_required
+def logout():
+    logout_user()
+    return jsonify({"success": True})
 
 # ============================================================
 # ENTRY POINT

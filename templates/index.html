@@ -53,13 +53,16 @@
                     <span class="nav-icon">📝</span>
                     <span>My Notes</span>
                 </a>
+                <a class="nav-item" onclick="logoutUser()">
+                    <span class="nav-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
             </div>
 
             <!-- girl element -->
             <div class="sidebar-girl">
                 <img src="{{ url_for('static', filename='images/girl.png') }}" alt="girl">
             </div>
-
 
 
             <div class="sidebar-footer">
@@ -83,7 +86,7 @@
                     <h1 class="hero-title">
                         Cook Something Special<br />
                         With<br />
-                        <em>Kitchen</em>
+                        <em>Ahava's Kitchen</em>
                     </h1>
                     <p class="hero-sub">Tell us what's in your kitchen — we'll figure out what's for dinner.</p>
                     <div class="hero-actions">
@@ -631,6 +634,16 @@
 
         // ---- INIT ----
         loadHomeStrip();
+
+        function logoutUser() {
+            fetch('/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = "/login";
+                })
+                .catch(() => {
+                    alert("Logout failed.");
+                });
+        }
     </script>
 </body>
 
