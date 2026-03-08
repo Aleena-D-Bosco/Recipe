@@ -53,7 +53,7 @@
                     <span class="nav-icon">📝</span>
                     <span>My Notes</span>
                 </a>
-                <a class="nav-item" onclick="logoutUser()">
+                <a class="nav-item" href="/logout">
                     <span class="nav-icon">🚪</span>
                     <span>Logout</span>
                 </a>
@@ -632,18 +632,8 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ---- INIT ----
-        loadHomeStrip();
 
-        function logoutUser() {
-            fetch('/logout', { method: 'POST' })
-                .then(() => {
-                    window.location.href = "/login";
-                })
-                .catch(() => {
-                    alert("Logout failed.");
-                });
-        }
+
     </script>
 </body>
 
