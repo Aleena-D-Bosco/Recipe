@@ -1,6 +1,20 @@
 # ============================================================
 # AUTH ROUTES
 # File: auth_routes.py
+#
+# Add these routes to your main Flask app (app.py / App2.py).
+# Make sure to:
+#   1. pip install flask-login bcrypt
+#   2. Run database_setup.py once before starting the app
+#   3. Import and register this blueprint in your main app
+#
+# In your main app file, add:
+#   from auth_routes import auth_bp
+#   app.register_blueprint(auth_bp)
+#   app.secret_key = "your-secret-key-here"   # change this!
+#
+# To protect any route, add:  @login_required
+# To get the logged-in user:  current_user  (from flask_login)
 # ============================================================
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
@@ -31,7 +45,7 @@ def init_login_manager(app):
     """Call this in your main app file after creating the Flask app."""
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_view = "auth.login_page"
+    login_manager.login_view = "auth.login_page"   # redirect here if not logged in
     login_manager.login_message = "Please log in to access this page."
 
     @login_manager.user_loader
@@ -49,7 +63,7 @@ def init_login_manager(app):
 @auth_bp.route("/login", methods=["GET"])
 def login_page():
     if current_user.is_authenticated:
-        return redirect(url_for("home"))
+        return redirect(url_for("index"))       # already logged in → home
     return render_template("login.html")
 
 
@@ -63,7 +77,7 @@ def login_post():
     if result["success"]:
         user = User(result["user"])
         login_user(user, remember=True)
-        return redirect(url_for("home"))
+        return redirect(url_for("index"))
     else:
         flash(result["message"], "error")
         return redirect(url_for("auth.login_page"))
@@ -71,17 +85,19 @@ def login_post():
 
 @auth_bp.route("/register", methods=["POST"])
 def register_post():
-    username      = request.form.get("username", "")
-    email         = request.form.get("email", "")
-    password      = request.form.get("password", "")
-    dietary       = request.form.get("dietary", "both")
+    username  = request.form.get("username", "")
+    email     = request.form.get("email", "")
+    password  = request.form.get("password", "")
+    dietary   = request.form.get("dietary", "both")
     allergies_raw = request.form.get("allergies", "")
 
     result = register_user(username, email, password)
 
     if result["success"]:
+        # Save dietary preferences right away
         allergies = [a.strip().lower() for a in allergies_raw.split(",") if a.strip()]
         save_preferences(result["user_id"], dietary, allergies)
+
         flash("Account created! Please log in.", "success")
         return redirect(url_for("auth.login_page"))
     else:
@@ -94,11 +110,11 @@ def register_post():
 def logout():
     logout_user()
     flash("You've been logged out.", "success")
-    return redirect(url_for("auth.login_page"))
+   return redirect(url_for("home"))
 
 
 # ------------------------------------------------------------------
-# USER DATA ROUTES
+# USER DATA ROUTES (called via JS fetch from the frontend)
 # ------------------------------------------------------------------
 
 @auth_bp.route("/api/history", methods=["GET"])
