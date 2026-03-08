@@ -1,75 +1,87 @@
-# 🍳 AI Recipe Generator — Backend
+# 🥘 Ahava's Kitchen — AI Smart Recipe Generator
 
-Flask + SQLite backend that stores dish name, ingredients, dietary preference, and allergy information.
+A smart, AI-powered recipe finder that matches recipes based on the ingredients you have at home.
+
+🌐 **Live Site**: [aleenadon08.pythonanywhere.com](https://aleenadon08.pythonanywhere.com)
 
 ---
 
-## 🚀 Quick Start
+## ✨ Features
 
+- 🔍 **Smart Recipe Search** — Enter ingredients you have and get matched recipes ranked by similarity
+- 🌿 **Diet Aware** — Filter by vegetarian or non-vegetarian preference
+- 🚫 **Allergy Filter** — Automatically exclude recipes with allergens
+- 🔄 **Ingredient Substitutes** — Suggests smart swaps for missing ingredients
+- ❤️ **Favourites** — Save your favourite recipes per user account
+- 🕐 **Search History** — Tracks your recent searches
+- 📝 **Kitchen Notes** — Personal notepad for cooking reminders
+- 🔐 **User Authentication** — Register, login and logout securely
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend**: Python, Flask, Flask-Login
+- **Frontend**: HTML, CSS, JavaScript
+- **Database**: SQLite
+- **Auth**: bcrypt password hashing
+- **Hosting**: PythonAnywhere
+
+---
+
+## 📁 Project Structure
+
+```
+Recipe/
+├── App2.py                  # Main Flask app
+├── database_setup.py        # Initialise auth database
+├── auth_routes.py           # Login, register, logout routes
+├── database.py              # Search history DB
+├── modules/
+│   ├── auth_module.py       # User authentication logic
+│   ├── user_data_module.py  # Favourites, history, preferences
+│   ├── recipe_database_module.py
+│   ├── recommendation_module.py
+│   ├── user_input_module.py
+│   ├── output_module.py
+│   └── substitute_module.py
+├── templates/
+│   ├── index.html           # Main app UI
+│   └── login.html           # Login & Register page
+└── static/
+    ├── style.css
+    └── images/
+```
+
+---
+
+## 🚀 Run Locally
+
+1. Clone the repo:
 ```bash
-pip install -r requirements.txt
-python app.py
+git clone https://github.com/Aleena-D-Bosco/Recipe.git
+cd Recipe
 ```
 
-Visit **http://127.0.0.1:5000** — the database is created automatically.
-
----
-
-## 🗃️ Database Schema
-
-```
-recipes
-├── id                  INTEGER  (auto, primary key)
-├── dish_name           TEXT     (required)
-├── ingredients         TEXT     (required)
-├── dietary_preference  TEXT     (required — e.g. Vegan, Vegetarian, Non-Vegetarian)
-├── allergy_info        TEXT     (optional — e.g. "Contains gluten, dairy")
-└── created_at          DATETIME (auto timestamp)
-```
-
----
-
-## 🔌 API Endpoints
-
-| Method | URL | What it does |
-|--------|-----|--------------|
-| POST | `/recipes` | Save a new recipe |
-| GET | `/recipes` | Get all recipes |
-| GET | `/recipes/<id>` | Get one recipe by ID |
-| GET | `/recipes/filter/diet?type=Vegan` | Filter by dietary preference |
-| GET | `/recipes/filter/allergy?avoid=gluten` | Filter allergy-safe recipes |
-| DELETE | `/recipes/<id>` | Delete a recipe |
-
----
-
-## 🧪 Example — Save a recipe
-
+2. Install dependencies:
 ```bash
-curl -X POST http://127.0.0.1:5000/recipes \
-     -H "Content-Type: application/json" \
-     -d '{
-       "dish_name": "Avocado Toast",
-       "ingredients": "bread, avocado, lemon, salt, chili flakes",
-       "dietary_preference": "Vegan",
-       "allergy_info": "Contains gluten"
-     }'
+pip install flask flask-login bcrypt
 ```
 
-Response:
-```json
-{ "success": true, "message": "Recipe saved with ID 1.", "id": 1 }
+3. Initialise the database:
+```bash
+python database_setup.py
 ```
+
+4. Run the app:
+```bash
+python App2.py
+```
+
+5. Visit `http://127.0.0.1:5000`
 
 ---
 
-## 📁 File Structure
+## 👩‍💻 Developed by
 
-```
-recipe_backend/
-├── app.py            ← Flask routes
-├── database.py       ← DB connection & table setup
-├── recipe_module.py  ← All database operations
-├── requirements.txt
-├── .gitignore
-└── README.md
-```
+**Aleena D Bosco** — [GitHub](https://github.com/Aleena-D-Bosco)
